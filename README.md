@@ -42,12 +42,12 @@ Regular - Email: regular@test.com, Password: Regular1!
 
 ## Project activation
 ### Server
-cd bcard_server
-nodemon index.js
+    cd bcard_server
+    nodemon index.js
 
 ### App
-cd bcard_client
-npm start
+    cd bcard_client
+    npm start
 
 ```bash
 $ git clone https://github.com/Maorfl/bcard.git
