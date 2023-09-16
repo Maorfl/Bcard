@@ -18,34 +18,34 @@ Admin - Email: admin@test.com, Password: Admin12!
 Business - Email: business@test.com, Password: Business1!
 Regular - Email: regular@test.com, Password: Regular1!
 
-#### Installation
+## Installation
 
-## .env
-# bcard_client
+### .env
+## bcard_client
     REACT_APP_API="http://localhost:7000/api"
 
-# bcard_server
+## bcard_server
     NODE_ENV = development
     PORT = 7000
     DB = "mongodb+srv://maorfl:M0301f1644@maor-cluster.yi54khe.mongodb.net/business" # Atlas
     # Local: DB = "mongodb://127.0.0.1:27017/business" 
     jwtKey = "business"
 
-## node_modules
-bcard_server - 
+### node_modules
+## bcard_server  
     cd bcard_server
     npm install
 
-bcard_client - 
+## bcard_client  
     cd bcard_client
     npm install --force    
 
-## Project activation
-# Server
+### Project activation
+## Server
 cd bcard_server
 nodemon index.js
 
-# App
+## App
 cd bcard_client
 npm start
 
