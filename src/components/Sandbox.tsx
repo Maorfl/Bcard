@@ -1,9 +1,8 @@
 import { FunctionComponent, useEffect, useState } from "react";
 import User from "../interfaces/User";
-import { getAllUsers, suspendUser } from "../services/usersService";
+import { getAllUsers } from "../services/usersService";
 import { Type } from "../enums/areYouSureType";
 import AreYouSureModal from "./AreYouSureModal";
-import { successMsg } from "../services/feedbacksService";
 
 interface SandboxProps {
 
@@ -11,7 +10,7 @@ interface SandboxProps {
 
 const Sandbox: FunctionComponent<SandboxProps> = () => {
     let [allUsers, setAllUsers] = useState<User[]>([]);
-    let [userId, setUserId] = useState<string>("");
+    let [userId, setUserId] = useState<number>(0);
     let [type, setType] = useState<string>("");
     let [isDataChanged, setIsDataChanged] = useState<boolean>(false);
     let [openAreYouSureModal, setOpenAreYouSureModal] = useState<boolean>(false);
@@ -34,6 +33,7 @@ const Sandbox: FunctionComponent<SandboxProps> = () => {
                             <tr>
                                 <th>ID</th>
                                 <th>First Name</th>
+                                <th>Middle Name</th>
                                 <th>Last Name</th>
                                 <th>Phone</th>
                                 <th>Email</th>
@@ -44,47 +44,39 @@ const Sandbox: FunctionComponent<SandboxProps> = () => {
                                 <th>Change Type</th>
                                 <th>Set Admin</th>
                                 <th>Delete User</th>
-                                <th>Ban User</th>
                             </tr>
                         </thead>
                         <tbody>
                             {allUsers.map((user: User) => (
-                                <tr key={user._id}>
-                                    <td>{user._id}</td>
-                                    <td>{user.name.first}</td>
-                                    <td>{user.name.last}</td>
+                                <tr key={user.id}>
+                                    <td>{user.id}</td>
+                                    <td>{user.firstName}</td>
+                                    <td>{user.middleName}</td>
+                                    <td>{user.lastName}</td>
                                     <td>{user.phone}</td>
                                     <td>{user.email}</td>
-                                    <td>{user.address.state ? `${user.address.country}, ${user.address.state}, ${user.address.city}, ${user.address.street} ${user.address.houseNumber}` : `${user.address.country}, ${user.address.city}, ${user.address.street} ${user.address.houseNumber}`}</td>
-                                    <td>{user.address.zip}</td>
+                                    <td>{user.state ? `${user.country}, ${user.state}, ${user.city}, ${user.street} ${user.houseNumber}` : `${user.country}, ${user.city}, ${user.street} ${user.houseNumber}`}</td>
+                                    <td>{user.zip}</td>
                                     <td>{user.gender}</td>
                                     <td>{user.userType}</td>
                                     <td>{user.userType == "admin" ? <i className="fa-solid fa-ban text-secondary fs-3"></i> : <button type="button" className="btn btn-outline-info btn-sm" onClick={() => {
-                                        setUserId(user._id as string);
+                                        setUserId(user.id as number);
                                         setType(Type.ChangeUserType);
                                         setRenderModal(!renderModal);
                                         setOpenAreYouSureModal(true);
                                     }}><i className="fa-solid fa-repeat"></i></button>}</td>
                                     <td>{user.userType == "admin" ? <i className="fa-solid fa-check text-success fs-3"></i> : <button type="button" className="btn btn-outline-warning btn-sm" onClick={() => {
-                                        setUserId(user._id as string);
+                                        setUserId(user.id as number);
                                         setType(Type.ChangeToAdmin);
                                         setRenderModal(!renderModal);
                                         setOpenAreYouSureModal(true);
                                     }}><i className="fa-solid fa-hammer"></i></button>}</td>
-                                    <td>{user.userType == "admin" && user.email == "maorfl14@gmail.com" ? <i className="fa-solid fa-ban text-secondary fs-3"></i> : <button type="button" className="btn btn-outline-danger btn-sm" onClick={() => {
-                                        setUserId(user._id as string);
+                                    <td>{user.userType == "admin" && user.id == 1 ? <i className="fa-solid fa-ban text-secondary fs-3"></i> : <button type="button" className="btn btn-outline-danger btn-sm" onClick={() => {
+                                        setUserId(user.id as number);
                                         setType(Type.DeleteUser);
                                         setRenderModal(!renderModal);
                                         setOpenAreYouSureModal(true);
                                     }}><i className="fa-solid fa-trash"></i></button>}</td>
-                                    <td>{user.userType == "admin" ? (<i className="fa-solid fa-ban text-secondary fs-3"></i>) : (<button type="button" className="btn btn-outline-primary btn-sm" onClick={() => {
-                                        setUserId(user._id as string);
-                                        suspendUser(user._id as string)
-                                            .then((res) => {
-                                                successMsg(`${user.name.first} ${user.name.last} has been suspended for 24 hours!`);
-                                            })
-                                            .catch((error) => console.log(error))
-                                    }}><i className="fa-solid fa-user-slash"></i></button>)}</td>
                                 </tr>
                             ))}
                         </tbody>

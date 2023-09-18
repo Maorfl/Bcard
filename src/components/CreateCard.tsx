@@ -1,90 +1,52 @@
 import { useFormik } from "formik";
 import * as yup from "yup";
-import { FunctionComponent, useEffect, useRef } from "react";
-import { addUser } from "../services/usersService";
+import { FunctionComponent, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { errorMsg, successMsg } from "../services/feedbacksService";
-import jwt_decode from "jwt-decode";
+import { addCard } from "../services/cardsService";
+import { successMsg } from "../services/feedbacksService";
 
-interface RegisterProps {
-    loggedIn: boolean
-    setLoggedIn: Function
+interface CreateCardProps {
+    userId: number
 }
 
-const Register: FunctionComponent<RegisterProps> = ({ setLoggedIn, loggedIn }) => {
+const CreateCard: FunctionComponent<CreateCardProps> = ({ userId }) => {
     let navigate = useNavigate();
-    let checkBoxElement = useRef<HTMLInputElement>(null);
-    let selectElement = useRef<HTMLSelectElement>(null);
 
     let formik = useFormik({
-        initialValues: { firstName: "", lastName: "", email: "", imageUrl: "", state: "", city: "", houseNumber: 0, middleName: "", phone: "", password: "", imageAlt: "", country: "", street: "", zip: "", userType: false, gender: "Male" },
+        initialValues: { title: "", description: "", email: "", imageUrl: "", state: "", city: "", houseNumber: 0, subtitle: "", phone: "", web: "", imageAlt: "", country: "", street: "", zip: "" },
         validationSchema: yup.object({
-            firstName: yup.string().required().min(2),
-            lastName: yup.string().required().min(2),
+            title: yup.string().required().min(2),
+            description: yup.string().required().min(2),
             email: yup.string().required().email(),
-            imageUrl: yup.string().url(),
+            imageUrl: yup.string(),
             state: yup.string(),
             city: yup.string().required().min(2),
             houseNumber: yup.number().required().min(1),
-            middleName: yup.string(),
+            subtitle: yup.string().required().min(2),
             phone: yup.string().required().min(4),
-            password: yup.string().required().min(8).matches(
-                /^.*(?=.{8,})((?=.*[!@#$%^&*()\-_=+{};:,<.>]){1})(?=.*\d)((?=.*[a-z]){1})((?=.*[A-Z]){1}).*$/,
-                "Password must contain at least 8 characters, one uppercase, one number and one special case character(!@#$%^&*()\-_=+{};:,<.>)"),
+            web: yup.string(),
             imageAlt: yup.string(),
             country: yup.string().required().min(2),
             street: yup.string().required().min(2),
             zip: yup.string()
         }),
         onSubmit: (values) => {
-            let userType = values.userType ? "business" : "regular";
-            let name = {
-                first: values.firstName,
-                middle: values.middleName,
-                last: values.lastName
-            };
-            let image = {
-                url: values.imageUrl,
-                alt: values.imageAlt
-            };
-            let address = {
-                state: values.state,
-                country: values.country,
-                city: values.city,
-                street: values.street,
-                houseNumber: values.houseNumber,
-                zip: values.zip
-            };
-
-            addUser({ name: name, image: image, address: address, email: values.email, password: values.password, phone: values.phone, userType: userType, gender: values.gender, suspended: new Date(Date.now()) })
+            addCard({ ...values, userId: userId, favoriteByUsers: [] })
                 .then((res) => {
-                    sessionStorage.setItem("token", JSON.stringify(res.data));
-                    sessionStorage.setItem("userInfo", JSON.stringify(jwt_decode(res.data)));
-                    successMsg(`You have registered successfully with ${(jwt_decode(res.data) as any).email}`);
-                    setLoggedIn(!loggedIn);
-                    navigate("/");
+                    successMsg("Card created successfuly!");
+                    navigate("/my-cards");
                 })
-                .catch((error) => {
-                    if (error.response.data == "User already exists!") errorMsg(error.response.data);
-                    else console.log(error);
-                })
+                .catch((error) => console.log(error))
         }
-    });
-
-    let handleResetForm = () => {
-        formik.resetForm();
-        (checkBoxElement.current as HTMLInputElement).checked = false;
-        (selectElement.current as HTMLSelectElement).value = "1";
-    }
+    })
 
     useEffect(() => {
         formik.setFieldValue("houseNumber", "");
     }, []);
-
     return (
         <>
             <div className="container">
-                <h2 className="text-center display-4 mt-3 mb-4">Register</h2>
+                <h1 className="display-4 text-center">Create Card</h1>
                 <form onSubmit={formik.handleSubmit}>
                     <div className="row justify-content-center mb-3">
                         <div className="col-md-4">
@@ -92,29 +54,29 @@ const Register: FunctionComponent<RegisterProps> = ({ setLoggedIn, loggedIn }) =
                                 <input
                                     type="text"
                                     className="form-control"
-                                    id="floatingFirstName"
-                                    placeholder="First name"
-                                    name="firstName"
-                                    value={formik.values.firstName}
+                                    id="floatingTitle"
+                                    placeholder="Title"
+                                    name="title"
+                                    value={formik.values.title}
                                     onChange={formik.handleChange}
                                     onBlur={formik.handleBlur}
                                 />
-                                {formik.errors.firstName && formik.touched.firstName && <p><small className="text-danger">{formik.errors.firstName}</small></p>}
-                                <label htmlFor="floatingFirstName">First name *</label>
+                                {formik.errors.title && formik.touched.title && <p><small className="text-danger">{formik.errors.title}</small></p>}
+                                <label htmlFor="floatingTitle">Title *</label>
                             </div>
                             <div className="form-floating mb-3">
                                 <input
                                     type="text"
                                     className="form-control"
-                                    id="floatingLastName"
-                                    placeholder="Last name"
-                                    name="lastName"
-                                    value={formik.values.lastName}
+                                    id="floatingDescription"
+                                    placeholder="Description"
+                                    name="description"
+                                    value={formik.values.description}
                                     onChange={formik.handleChange}
                                     onBlur={formik.handleBlur}
                                 />
-                                {formik.errors.lastName && formik.touched.lastName && <p><small className="text-danger">{formik.errors.lastName}</small></p>}
-                                <label htmlFor="floatingLastName">Last name *</label>
+                                {formik.errors.description && formik.touched.description && <p><small className="text-danger">{formik.errors.description}</small></p>}
+                                <label htmlFor="floatingDescription">Description *</label>
                             </div>
                             <div className="form-floating mb-3">
                                 <input
@@ -184,31 +146,21 @@ const Register: FunctionComponent<RegisterProps> = ({ setLoggedIn, loggedIn }) =
                                 {formik.errors.houseNumber && formik.touched.houseNumber && <p><small className="text-danger">{formik.errors.houseNumber}</small></p>}
                                 <label htmlFor="floatingHouseNumber">House number *</label>
                             </div>
-                            <div className="form-check">
-                                <input
-                                    className="form-check-input"
-                                    type="checkbox"
-                                    id="flexCheckDefault"
-                                    name="userType"
-                                    onChange={formik.handleChange}
-                                    ref={checkBoxElement}
-                                />
-                                <label className="form-check-label" htmlFor="flexCheckDefault">Signup as business</label>
-                            </div>
                         </div>
                         <div className="col-md-4">  {/* ************************************* */}
                             <div className="form-floating mb-3">
                                 <input
                                     type="text"
                                     className="form-control"
-                                    id="floatingMiddleName"
-                                    placeholder="Middle name"
-                                    name="middleName"
-                                    value={formik.values.middleName}
+                                    id="floatingSubtitle"
+                                    placeholder="Subtitle"
+                                    name="subtitle"
+                                    value={formik.values.subtitle}
                                     onChange={formik.handleChange}
                                     onBlur={formik.handleBlur}
                                 />
-                                <label htmlFor="floatingMiddleName">Middle name</label>
+                                {formik.errors.subtitle && formik.touched.subtitle && <p><small className="text-danger">{formik.errors.subtitle}</small></p>}
+                                <label htmlFor="floatingSubtitle">Subtitle *</label>
                             </div>
                             <div className="form-floating mb-3">
                                 <input
@@ -226,17 +178,16 @@ const Register: FunctionComponent<RegisterProps> = ({ setLoggedIn, loggedIn }) =
                             </div>
                             <div className="form-floating mb-3">
                                 <input
-                                    type="password"
+                                    type="text"
                                     className="form-control"
-                                    id="floatingPassword"
-                                    placeholder="Password"
+                                    id="floatingWeb"
+                                    placeholder="Web"
                                     name="password"
-                                    value={formik.values.password}
+                                    value={formik.values.web}
                                     onChange={formik.handleChange}
                                     onBlur={formik.handleBlur}
                                 />
-                                {formik.errors.password && formik.touched.password && <p><small className="text-danger">{formik.errors.password}</small></p>}
-                                <label htmlFor="floatingPassword">Password *</label>
+                                <label htmlFor="floatingWeb">Web</label>
                             </div>
                             <div className="form-floating mb-3">
                                 <input
@@ -292,16 +243,6 @@ const Register: FunctionComponent<RegisterProps> = ({ setLoggedIn, loggedIn }) =
                                 />
                                 <label htmlFor="floatingZip">Zip</label>
                             </div>
-                            <select
-                                className="form-select"
-                                aria-label="Gender select"
-                                name="gender"
-                                onChange={formik.handleChange}
-                                ref={selectElement}
-                            >
-                                <option value={"Male"}>Male</option>
-                                <option value={"Female"}>Female</option>
-                            </select>
                         </div>
                     </div>
                     <div className="row justify-content-center">
@@ -309,18 +250,18 @@ const Register: FunctionComponent<RegisterProps> = ({ setLoggedIn, loggedIn }) =
                             <button className="btn btn-outline-danger w-100" onClick={() => navigate(-1)}>CANCEL</button>
                         </div>
                         <div className="col-md-4">
-                            <button className="btn btn-outline-info w-100" onClick={() => handleResetForm()}><i className="fa-solid fa-arrows-rotate"></i></button>
+                            <button className="btn btn-outline-info w-100" onClick={() => formik.resetForm()}><i className="fa-solid fa-arrows-rotate"></i></button>
                         </div>
                     </div>
                     <div className="row justify-content-center mt-3">
                         <div className="col-md-8">
-                            <button type="submit" className="btn btn-success w-100" disabled={!formik.isValid}>REGISTER</button>
+                            <button type="submit" className="btn btn-success w-100" disabled={!formik.isValid}>CREATE</button>
                         </div>
                     </div>
                 </form >
-            </div >
+            </div>
         </>
     );
 }
 
-export default Register;
+export default CreateCard;

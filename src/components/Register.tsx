@@ -3,8 +3,7 @@ import * as yup from "yup";
 import { FunctionComponent, useEffect, useRef } from "react";
 import { addUser } from "../services/usersService";
 import { useNavigate } from "react-router-dom";
-import { errorMsg, successMsg } from "../services/feedbacksService";
-import jwt_decode from "jwt-decode";
+import { successMsg } from "../services/feedbacksService";
 
 interface RegisterProps {
     loggedIn: boolean
@@ -38,38 +37,16 @@ const Register: FunctionComponent<RegisterProps> = ({ setLoggedIn, loggedIn }) =
         }),
         onSubmit: (values) => {
             let userType = values.userType ? "business" : "regular";
-            let name = {
-                first: values.firstName,
-                middle: values.middleName,
-                last: values.lastName
-            };
-            let image = {
-                url: values.imageUrl,
-                alt: values.imageAlt
-            };
-            let address = {
-                state: values.state,
-                country: values.country,
-                city: values.city,
-                street: values.street,
-                houseNumber: values.houseNumber,
-                zip: values.zip
-            };
 
-            addUser({ name: name, image: image, address: address, email: values.email, password: values.password, phone: values.phone, userType: userType, gender: values.gender, suspended: new Date(Date.now()) })
+            addUser({ ...values, userType: userType, gender: values.gender })
                 .then((res) => {
-                    sessionStorage.setItem("token", JSON.stringify(res.data));
-                    sessionStorage.setItem("userInfo", JSON.stringify(jwt_decode(res.data)));
-                    successMsg(`You have registered successfully with ${(jwt_decode(res.data) as any).email}`);
+                    sessionStorage.setItem("userInfo", JSON.stringify(res.data));
+                    successMsg(`You have registered successfully with ${res.data.email}`);
                     setLoggedIn(!loggedIn);
                     navigate("/");
                 })
-                .catch((error) => {
-                    if (error.response.data == "User already exists!") errorMsg(error.response.data);
-                    else console.log(error);
-                })
         }
-    });
+    })
 
     let handleResetForm = () => {
         formik.resetForm();

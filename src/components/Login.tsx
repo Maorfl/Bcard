@@ -1,10 +1,9 @@
 import { useFormik } from "formik";
 import { FunctionComponent } from "react";
 import * as yup from "yup";
-import { checkLoggedInUser } from "../services/usersService";
+import { checkUser } from "../services/usersService";
 import { useNavigate } from "react-router-dom";
 import { errorMsg, successMsg } from "../services/feedbacksService";
-import jwt_decode from "jwt-decode";
 
 interface LoginProps {
     loggedIn: boolean
@@ -20,20 +19,17 @@ const Login: FunctionComponent<LoginProps> = ({ setLoggedIn, loggedIn }) => {
             password: yup.string().required().min(8)
         }),
         onSubmit: (values) => {
-            checkLoggedInUser(values.email, values.password)
+            checkUser(values.email, values.password)
                 .then((res) => {
-                    if (Date.parse((jwt_decode(res.data) as any).suspended) - Date.now() < 0) {
-                        sessionStorage.setItem("token", JSON.stringify(res.data));
-                        sessionStorage.setItem("userInfo", JSON.stringify(jwt_decode(res.data)))
-                        successMsg(`Welcome back ${(jwt_decode(res.data) as any).name.first} ${(jwt_decode(res.data) as any).name.last}`);
+                    if (res.data.length) {
+                        sessionStorage.setItem("userInfo", JSON.stringify(res.data[0]))
+                        successMsg(`Welcome back ${res.data[0].firstName} ${res.data[0].lastName}`);
                         setLoggedIn(!loggedIn);
                         navigate("/");
                     }
-                    else {
-                        errorMsg(`Your user has been banned until ${(jwt_decode(res.data) as any).suspended}`)
-                    }
+                    else errorMsg("User does not exist!");
                 })
-                .catch((error) => errorMsg(error.response.data))
+                .catch((error) => console.log(error))
         }
     })
     return (

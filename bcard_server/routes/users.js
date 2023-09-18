@@ -13,6 +13,10 @@ const loginSchema = joi.object({
     password: joi.string().required().min(8).regex(/^.*(?=.{8,})((?=.*[!@#$%^&*()\-_=+{};:,<.>]){1})(?=.*\d)((?=.*[a-z]){1})((?=.*[A-Z]){1}).*$/)
 });
 
+const userTypeSchema = joi.object({
+    userType: joi.string()
+});
+
 const userJoiSchema = joi.object({
     name: {
         first: joi.string().required().min(2),
@@ -52,7 +56,7 @@ router.post("/", async (req, res) => {
         user.password = await bcrypt.hash(user.password, salt);
         await user.save();
 
-        const token = jwt.sign({ _id: user._id, name: user.name, email: user.email, phone: user.phone, address: user.address, isBusiness: user.isBusiness }, process.env.jwtKey);
+        const token = jwt.sign({ _id: user._id, name: user.name, email: user.email, phone: user.phone, address: user.address, gender: user.gender, userType: user.userType }, process.env.jwtKey);
 
         res.status(201).send(token);
     } catch (error) {
@@ -71,7 +75,7 @@ router.post("/login", async (req, res) => {
         const result = await bcrypt.compare(req.body.password, user.password);
         if (!result) return res.status(400).send("Wrong password!");
 
-        const token = jwt.sign({ _id: user._id, name: user.name, email: user.email, phone: user.phone, address: user.address, gender: user.gender, userType: user.userType }, process.env.jwtKey);
+        const token = jwt.sign({ _id: user._id, name: user.name, email: user.email, phone: user.phone, address: user.address, gender: user.gender, userType: user.userType, suspended: user.suspended }, process.env.jwtKey);
 
         res.status(200).send(token);
     } catch (error) {
@@ -84,7 +88,7 @@ router.get("/", async (req, res) => {
         let users = await User.find();
         if (!users) return res.status(404).send("No users available!");
 
-        users = _.map(users, (user) => _.pick(user, ["_id", "name", "email", "phone", "address", "image", "gender", "userType"]));
+        users = _.map(users, (user) => _.pick(user, ["_id", "name", "email", "phone", "address", "image", "gender", "userType", "suspended"]));
 
         res.status(200).send(users);
     } catch (error) {
@@ -97,7 +101,7 @@ router.get("/:id", auth, async (req, res) => {
         let user = await User.findById(req.params.id);
         if (!user) return res.status(404).send("User does not exist!");
 
-        res.status(200).send(_.pick(user, ["_id", "name", "email", "phone", "isBusiness", "address", "image", "gender", "userType"]));
+        res.status(200).send(_.pick(user, ["_id", "name", "email", "phone", "address", "image", "gender", "userType", "suspended"]));
     } catch (error) {
         res.status(400).send(error);
     }
@@ -129,7 +133,13 @@ router.patch("/:id", auth, async (req, res) => {
         let user = await User.findOne({ _id: req.params.id });
         if (!user) return res.status(404).send("User does not exist!");
 
-        user.userType = req.body.userType;
+        const { error } = userTypeSchema.validate(req.body);
+        if (!error) user.userType = req.body.userType;
+        else {
+            let suspendTime = new Date();
+            suspendTime.setTime(Date.now() + 24 * 60 * 60 * 1000);
+            user.suspended = suspendTime;
+        }
         await user.save();
 
         res.status(200).send(user);

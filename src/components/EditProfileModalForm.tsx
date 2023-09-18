@@ -1,23 +1,24 @@
+import { FunctionComponent, useEffect, useRef } from "react";
+import User from "../interfaces/User";
 import { useFormik } from "formik";
 import * as yup from "yup";
-import { FunctionComponent, useEffect, useRef } from "react";
-import { addUser } from "../services/usersService";
 import { useNavigate } from "react-router-dom";
-import { errorMsg, successMsg } from "../services/feedbacksService";
-import jwt_decode from "jwt-decode";
+import { updateUser } from "../services/usersService";
+import { successMsg } from "../services/feedbacksService";
 
-interface RegisterProps {
-    loggedIn: boolean
-    setLoggedIn: Function
+interface EditProfileModalFormProps {
+    onHide: Function
+    renderProfile: Function
+    currentUser: User
 }
 
-const Register: FunctionComponent<RegisterProps> = ({ setLoggedIn, loggedIn }) => {
-    let navigate = useNavigate();
+const EditProfileModalForm: FunctionComponent<EditProfileModalFormProps> = ({ onHide, renderProfile, currentUser }) => {
     let checkBoxElement = useRef<HTMLInputElement>(null);
     let selectElement = useRef<HTMLSelectElement>(null);
+    let navigate = useNavigate();
 
     let formik = useFormik({
-        initialValues: { firstName: "", lastName: "", email: "", imageUrl: "", state: "", city: "", houseNumber: 0, middleName: "", phone: "", password: "", imageAlt: "", country: "", street: "", zip: "", userType: false, gender: "Male" },
+        initialValues: { firstName: currentUser.firstName, middleName: currentUser.middleName, lastName: currentUser.lastName, phone: currentUser.phone, email: currentUser.email, password: currentUser.password, imageUrl: currentUser.imageUrl, imageAlt: currentUser.imageAlt, state: currentUser.state, country: currentUser.country, city: currentUser.city, street: currentUser.street, houseNumber: currentUser.houseNumber, zip: currentUser.zip, gender: currentUser.gender, userType: currentUser.userType },
         validationSchema: yup.object({
             firstName: yup.string().required().min(2),
             lastName: yup.string().required().min(2),
@@ -36,55 +37,35 @@ const Register: FunctionComponent<RegisterProps> = ({ setLoggedIn, loggedIn }) =
             street: yup.string().required().min(2),
             zip: yup.string()
         }),
+        enableReinitialize: true,
         onSubmit: (values) => {
-            let userType = values.userType ? "business" : "regular";
-            let name = {
-                first: values.firstName,
-                middle: values.middleName,
-                last: values.lastName
-            };
-            let image = {
-                url: values.imageUrl,
-                alt: values.imageAlt
-            };
-            let address = {
-                state: values.state,
-                country: values.country,
-                city: values.city,
-                street: values.street,
-                houseNumber: values.houseNumber,
-                zip: values.zip
-            };
+            let userType = currentUser.userType == "business" ? values.userType ? "regular" : "business" : currentUser.userType == "regular" ? values.userType ? "business" : "regular" : "admin";
 
-            addUser({ name: name, image: image, address: address, email: values.email, password: values.password, phone: values.phone, userType: userType, gender: values.gender, suspended: new Date(Date.now()) })
+            updateUser({ ...values, userType: userType }, currentUser.id as number)
                 .then((res) => {
-                    sessionStorage.setItem("token", JSON.stringify(res.data));
-                    sessionStorage.setItem("userInfo", JSON.stringify(jwt_decode(res.data)));
-                    successMsg(`You have registered successfully with ${(jwt_decode(res.data) as any).email}`);
-                    setLoggedIn(!loggedIn);
-                    navigate("/");
+                    successMsg("Profile updated successfully");
+                    renderProfile();
+                    onHide();
                 })
-                .catch((error) => {
-                    if (error.response.data == "User already exists!") errorMsg(error.response.data);
-                    else console.log(error);
-                })
+                .catch((error) => console.log(error))
         }
-    });
+    })
 
     let handleResetForm = () => {
         formik.resetForm();
-        (checkBoxElement.current as HTMLInputElement).checked = false;
-        (selectElement.current as HTMLSelectElement).value = "1";
+        if (formik.values.gender == "Male") (selectElement.current as HTMLSelectElement).value = "1";
+        else (selectElement.current as HTMLSelectElement).value = "2";
     }
 
     useEffect(() => {
-        formik.setFieldValue("houseNumber", "");
+        if (formik.values.gender == "Male") (selectElement.current as HTMLSelectElement).value = "1";
+        else (selectElement.current as HTMLSelectElement).value = "2";
     }, []);
 
     return (
         <>
             <div className="container">
-                <h2 className="text-center display-4 mt-3 mb-4">Register</h2>
+                <h2 className="text-center display-4 mt-3 mb-4">Edit Profile</h2>
                 <form onSubmit={formik.handleSubmit}>
                     <div className="row justify-content-center mb-3">
                         <div className="col-md-4">
@@ -184,17 +165,30 @@ const Register: FunctionComponent<RegisterProps> = ({ setLoggedIn, loggedIn }) =
                                 {formik.errors.houseNumber && formik.touched.houseNumber && <p><small className="text-danger">{formik.errors.houseNumber}</small></p>}
                                 <label htmlFor="floatingHouseNumber">House number *</label>
                             </div>
-                            <div className="form-check">
-                                <input
-                                    className="form-check-input"
-                                    type="checkbox"
-                                    id="flexCheckDefault"
-                                    name="userType"
-                                    onChange={formik.handleChange}
-                                    ref={checkBoxElement}
-                                />
-                                <label className="form-check-label" htmlFor="flexCheckDefault">Signup as business</label>
-                            </div>
+                            {currentUser.userType == "regular" ? (
+                                <div className="form-check">
+                                    <input
+                                        className="form-check-input"
+                                        type="checkbox"
+                                        id="flexCheckDefault"
+                                        name="userType"
+                                        onChange={formik.handleChange}
+                                        ref={checkBoxElement}
+                                    />
+                                    <label className="form-check-label" htmlFor="flexCheckDefault">Change to business user</label>
+                                </div>) : currentUser.userType == "business" && (
+                                    <div className="form-check">
+                                        <input
+                                            className="form-check-input"
+                                            type="checkbox"
+                                            id="flexCheckDefault"
+                                            name="userType"
+                                            onChange={formik.handleChange}
+                                            ref={checkBoxElement}
+                                        />
+                                        <label className="form-check-label" htmlFor="flexCheckDefault">Change to regular user</label>
+                                    </div>
+                                )}
                         </div>
                         <div className="col-md-4">  {/* ************************************* */}
                             <div className="form-floating mb-3">
@@ -299,14 +293,14 @@ const Register: FunctionComponent<RegisterProps> = ({ setLoggedIn, loggedIn }) =
                                 onChange={formik.handleChange}
                                 ref={selectElement}
                             >
-                                <option value={"Male"}>Male</option>
-                                <option value={"Female"}>Female</option>
+                                <option value={1}>Male</option>
+                                <option value={2}>Female</option>
                             </select>
                         </div>
                     </div>
                     <div className="row justify-content-center">
                         <div className="col-md-4">
-                            <button className="btn btn-outline-danger w-100" onClick={() => navigate(-1)}>CANCEL</button>
+                            <button className="btn btn-outline-danger w-100" onClick={() => onHide()}>CANCEL</button>
                         </div>
                         <div className="col-md-4">
                             <button className="btn btn-outline-info w-100" onClick={() => handleResetForm()}><i className="fa-solid fa-arrows-rotate"></i></button>
@@ -314,7 +308,7 @@ const Register: FunctionComponent<RegisterProps> = ({ setLoggedIn, loggedIn }) =
                     </div>
                     <div className="row justify-content-center mt-3">
                         <div className="col-md-8">
-                            <button type="submit" className="btn btn-success w-100" disabled={!formik.isValid}>REGISTER</button>
+                            <button type="submit" className="btn btn-warning w-100" disabled={!formik.isValid}>UPDATE</button>
                         </div>
                     </div>
                 </form >
@@ -323,4 +317,4 @@ const Register: FunctionComponent<RegisterProps> = ({ setLoggedIn, loggedIn }) =
     );
 }
 
-export default Register;
+export default EditProfileModalForm;

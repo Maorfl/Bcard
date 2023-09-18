@@ -4,9 +4,6 @@ export default interface User {
         middle?: string,
         last: string
     },
-    // firstName: string,
-    // middleName?: string,
-    // lastName: string,
     phone: string,
     email: string,
     password?: string,
@@ -14,8 +11,6 @@ export default interface User {
         url?: string,
         alt?: string
     },
-    // imageUrl?: string,
-    // imageAlt?: string,
     address: {
         state?: string,
         country: string,
@@ -25,6 +20,7 @@ export default interface User {
         zip?: string,
     }
     gender?: string,
-    userType?: string
+    userType?: string,
+    suspended?: Date,
     _id?: string
 }

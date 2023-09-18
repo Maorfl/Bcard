@@ -72,6 +72,9 @@ const userSchema = new mongoose.Schema({
     },
     userType: {
         type: String
+    },
+    suspended: {
+        type: Date
     }
 });
 

@@ -1,0 +1,128 @@
+:root {
+    --color-primary: #ededed;
+    --color-secondary: #c2caca88;
+    --color-modal: #ededed;
+    --color-title: #212529;
+    --color-card-contant: #212529;
+    --color-navbar: #0d6efd;
+    --color-card: white;
+    --color-icon: grey;
+    --color-button-primary: #0d6efd;
+    --color-button-success: #198754;
+    --color-button-warning: #ffc107;
+    --color-button-danger: #dc3545;
+    --color-table: white;
+    --color-input-bgc: white;
+    --hover-color: #fff;
+}
+
+.dark {
+    --color-primary: #212529;
+    --color-secondary: #586573;
+    --color-modal: #414952;
+    --color-title: #bfd0e6;
+    --color-card-contant: #c4e3ff;
+    --color-navbar: #002152;
+    --color-card: #675d5d;
+    --color-icon: #e4e4e4;
+    --color-button-primary: #002152;
+    --color-button-success: #0c3c25;
+    --color-button-warning: #6f5400;
+    --color-button-danger: #601119;
+    --color-table: #586573;
+    --color-input-bgc: grey;
+    --hover-color: #fff;
+}
+
+.App {
+    background-color: var(--color-primary);
+    color: var(--color-title);
+    min-height: 100vh;
+}
+
+.navbar {
+    background-color: var(--color-navbar) !important;
+}
+
+.home {
+    background-color: var(--color-primary);
+}
+
+.card {
+    background-color: var(--color-card);
+    color: var(--color-card-contant);
+}
+
+.card i {
+    color: var(--color-icon);
+
+    &:hover {
+        cursor: pointer;
+    }
+}
+
+.btn-primary {
+    background-color: var(--color-button-primary) !important;
+    border-color: var(--color-button-primary);
+}
+
+.btn-success {
+    background-color: var(--color-button-success) !important;
+    border-color: var(--color-button-success);
+}
+
+.btn-warning {
+    background-color: var(--color-button-warning) !important;
+    border-color: var(--color-button-warning);
+}
+
+.btn-danger {
+    background-color: var(--color-button-danger) !important;
+    border-color: var(--color-button-danger);
+}
+
+.table {
+    & th {
+        background-color: var(--color-table) !important;
+        color: var(--color-card-contant);
+    }
+
+    & td {
+        background-color: var(--color-table) !important;
+        color: var(--color-card-contant);
+    }
+}
+
+.modalTheme {
+    background-color: var(--color-primary) !important;
+    color: var(--color-title);
+
+    &.btn-danger {
+        background-color: var(--color-button-danger) !important;
+        border-color: var(--color-button-danger);
+    }
+}
+
+form .form-floating input {
+    background-color: var(--color-table) !important;
+    color: var(--color-card-contant) !important;
+}
+
+ol li {
+    background-color: var(--color-table) !important;
+    color: var(--color-card-contant) !important;
+}
+
+.shadow img {
+    &:hover {
+        cursor: pointer;
+    }
+}
+
+.modalImage {
+    object-fit: cover;
+}
+
+li {
+    font-size: 1.25rem;
+}
