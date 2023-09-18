@@ -87,7 +87,7 @@ router.post("/login", async (req, res) => {
                 }
             } else {
                 let suspendTime = new Date();
-                suspendTime.setTime(Date.now() + 1 * 2 * 60 * 1000);
+                suspendTime.setTime(Date.now() + 24 * 60 * 60 * 1000);
                 user.suspended = suspendTime;
                 user.loginAttempts = 0;
                 await user.save();
