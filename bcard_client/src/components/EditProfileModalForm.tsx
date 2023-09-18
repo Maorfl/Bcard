@@ -15,7 +15,6 @@ interface EditProfileModalFormProps {
 const EditProfileModalForm: FunctionComponent<EditProfileModalFormProps> = ({ onHide, renderProfile, currentUser }) => {
     let checkBoxElement = useRef<HTMLInputElement>(null);
     let selectElement = useRef<HTMLSelectElement>(null);
-    let navigate = useNavigate();
 
     let formik = useFormik({
         initialValues: { firstName: currentUser.name.first, middleName: currentUser.name.middle, lastName: currentUser.name.last, phone: currentUser.phone, email: currentUser.email, imageUrl: currentUser.image?.url, imageAlt: currentUser.image?.alt, state: currentUser.address.state, country: currentUser.address.country, city: currentUser.address.city, street: currentUser.address.street, houseNumber: currentUser.address.houseNumber, zip: currentUser.address.zip, gender: currentUser.gender, userType: currentUser.userType },
@@ -29,9 +28,6 @@ const EditProfileModalForm: FunctionComponent<EditProfileModalFormProps> = ({ on
             houseNumber: yup.number().required().min(1),
             middleName: yup.string(),
             phone: yup.string().required().min(4),
-            // password: yup.string().required().min(8).matches(
-            //     /^.*(?=.{8,})((?=.*[!@#$%^&*()\-_=+{};:,<.>]){1})(?=.*\d)((?=.*[a-z]){1})((?=.*[A-Z]){1}).*$/,
-            //     "Password must contain at least 8 characters, one uppercase, one number and one special case character(!@#$%^&*()\-_=+{};:,<.>)"),
             imageAlt: yup.string(),
             country: yup.string().required().min(2),
             street: yup.string().required().min(2),
@@ -236,20 +232,6 @@ const EditProfileModalForm: FunctionComponent<EditProfileModalFormProps> = ({ on
                                 {formik.errors.phone && formik.touched.phone && <p><small className="text-danger">{formik.errors.phone}</small></p>}
                                 <label htmlFor="floatingPhone">Phone *</label>
                             </div>
-                            {/* <div className="form-floating mb-3">
-                                <input
-                                    type="password"
-                                    className="form-control"
-                                    id="floatingPassword"
-                                    placeholder="Password"
-                                    name="password"
-                                    value={formik.values.password}
-                                    onChange={formik.handleChange}
-                                    onBlur={formik.handleBlur}
-                                />
-                                {formik.errors.password && formik.touched.password && <p><small className="text-danger">{formik.errors.password}</small></p>}
-                                <label htmlFor="floatingPassword">Password *</label>
-                            </div> */}
                             <div className="form-floating mb-3">
                                 <input
                                     type="text"

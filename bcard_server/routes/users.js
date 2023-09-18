@@ -39,7 +39,9 @@ const userJoiSchema = joi.object({
         alt: joi.string().allow('')
     },
     gender: joi.string(),
-    userType: joi.string().required()
+    userType: joi.string().required(),
+    suspended: joi.date(),
+    loginAttempts: joi.number()
 });
 
 router.post("/", async (req, res) => {
