@@ -20,7 +20,7 @@ Regular - Email: regular@test.com, Password: Regular1!
 
 # Installation
 
-## .env
+## .env - Must be added independently in both folders
 ### bcard_client
     REACT_APP_API="http://localhost:7000/api"
 
