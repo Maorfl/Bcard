@@ -22,5 +22,6 @@ export default interface User {
     gender?: string,
     userType?: string,
     suspended?: Date,
+    loginAttempts?: number,
     _id?: string
 }

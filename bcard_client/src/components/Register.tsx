@@ -56,7 +56,7 @@ const Register: FunctionComponent<RegisterProps> = ({ setLoggedIn, loggedIn }) =
                 zip: values.zip
             };
 
-            addUser({ name: name, image: image, address: address, email: values.email, password: values.password, phone: values.phone, userType: userType, gender: values.gender, suspended: new Date(Date.now()) })
+            addUser({ name: name, image: image, address: address, email: values.email, password: values.password, phone: values.phone, userType: userType, gender: values.gender, suspended: new Date(Date.now()), loginAttempts: 0 })
                 .then((res) => {
                     sessionStorage.setItem("token", JSON.stringify(res.data));
                     sessionStorage.setItem("userInfo", JSON.stringify(jwt_decode(res.data)));

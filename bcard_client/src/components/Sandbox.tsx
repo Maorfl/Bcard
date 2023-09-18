@@ -4,6 +4,7 @@ import { getAllUsers, suspendUser } from "../services/usersService";
 import { Type } from "../enums/areYouSureType";
 import AreYouSureModal from "./AreYouSureModal";
 import { successMsg } from "../services/feedbacksService";
+import { Button, OverlayTrigger, Tooltip } from "react-bootstrap";
 
 interface SandboxProps {
 
@@ -38,7 +39,6 @@ const Sandbox: FunctionComponent<SandboxProps> = () => {
                                 <th>Phone</th>
                                 <th>Email</th>
                                 <th>Adress</th>
-                                <th>Zip</th>
                                 <th>Gender</th>
                                 <th>User Type</th>
                                 <th>Change Type</th>
@@ -56,7 +56,6 @@ const Sandbox: FunctionComponent<SandboxProps> = () => {
                                     <td>{user.phone}</td>
                                     <td>{user.email}</td>
                                     <td>{user.address.state ? `${user.address.country}, ${user.address.state}, ${user.address.city}, ${user.address.street} ${user.address.houseNumber}` : `${user.address.country}, ${user.address.city}, ${user.address.street} ${user.address.houseNumber}`}</td>
-                                    <td>{user.address.zip}</td>
                                     <td>{user.gender}</td>
                                     <td>{user.userType}</td>
                                     <td>{user.userType == "admin" ? <i className="fa-solid fa-ban text-secondary fs-3"></i> : <button type="button" className="btn btn-outline-info btn-sm" onClick={() => {
@@ -77,14 +76,24 @@ const Sandbox: FunctionComponent<SandboxProps> = () => {
                                         setRenderModal(!renderModal);
                                         setOpenAreYouSureModal(true);
                                     }}><i className="fa-solid fa-trash"></i></button>}</td>
-                                    <td>{user.userType == "admin" ? (<i className="fa-solid fa-ban text-secondary fs-3"></i>) : (<button type="button" className="btn btn-outline-primary btn-sm" onClick={() => {
+                                    <td>{user.userType == "admin" ? (<i className="fa-solid fa-ban text-secondary fs-3"></i>) : (Date.parse((user.suspended as Date).toString()) - Date.now()) < 0 ? (<button type="button" className="btn btn-outline-primary btn-sm" onClick={() => {
                                         setUserId(user._id as string);
-                                        suspendUser(user._id as string)
-                                            .then((res) => {
-                                                successMsg(`${user.name.first} ${user.name.last} has been suspended for 24 hours!`);
-                                            })
-                                            .catch((error) => console.log(error))
-                                    }}><i className="fa-solid fa-user-slash"></i></button>)}</td>
+                                        setType(Type.SuspendUser);
+                                        setRenderModal(!renderModal);
+                                        setOpenAreYouSureModal(true);
+                                    }}><i className="fa-solid fa-user-slash"></i></button>) : (
+                                        <OverlayTrigger overlay={<Tooltip id="tooltip-disabled">{user.suspended?.toString()}</Tooltip>}>
+                                            <span className="d-inline-block">
+                                                <Button variant="secondary" size="sm" onClick={() => {
+                                                    setUserId(user._id as string);
+                                                    setType(Type.UnlockUser);
+                                                    setRenderModal(!renderModal);
+                                                    setOpenAreYouSureModal(true);
+                                                }}>
+                                                    <i className="fa-solid fa-lock"></i>
+                                                </Button>
+                                            </span>
+                                        </OverlayTrigger>)}</td>
                                 </tr>
                             ))}
                         </tbody>
@@ -98,3 +107,5 @@ const Sandbox: FunctionComponent<SandboxProps> = () => {
 }
 
 export default Sandbox;
+
+// disabled style={{ pointerEvents: 'none' }

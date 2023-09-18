@@ -39,8 +39,16 @@ export function changeUserType(userId: string, newUserType: string) {
     });
 }
 
-export function suspendUser(userId: string) {
-    return axios.patch(`${api}/${userId}`, { suspended: Date.now() }, {
+export function suspendUser(userId: string, suspendTime: number) {
+    return axios.patch(`${api}/${userId}`, { suspendTime: suspendTime }, {
+        headers: {
+            Authorization: JSON.parse(sessionStorage.getItem("token") as string)
+        }
+    });
+}
+
+export function unSuspendUser(userId: string) {
+    return axios.patch(`${api}/${userId}`, { suspendTime: 0 }, {
         headers: {
             Authorization: JSON.parse(sessionStorage.getItem("token") as string)
         }

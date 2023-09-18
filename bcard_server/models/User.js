@@ -75,6 +75,9 @@ const userSchema = new mongoose.Schema({
     },
     suspended: {
         type: Date
+    },
+    loginAttempts: {
+        type: Number
     }
 });
 

@@ -14,7 +14,7 @@ const loginSchema = joi.object({
 });
 
 const userTypeSchema = joi.object({
-    userType: joi.string()
+    userType: joi.string().required()
 });
 
 const userJoiSchema = joi.object({
@@ -72,8 +72,28 @@ router.post("/login", async (req, res) => {
         const user = await User.findOne({ email: req.body.email });
         if (!user) return res.status(404).send("User does not exist!");
 
-        const result = await bcrypt.compare(req.body.password, user.password);
-        if (!result) return res.status(400).send("Wrong password!");
+        if ((user.suspended.getTime() - Date.now()) < 0) {
+            if (user.loginAttempts < 3) {
+                const result = await bcrypt.compare(req.body.password, user.password);
+                if (!result && user.userType != "admin") {
+                    user.loginAttempts += 1;
+                    await user.save();
+                    return res.status(400).send(`Wrong password! ${3 - user.loginAttempts} attempts left!`);
+                } else if (!result && user.userType == "admin") {
+                    return res.status(400).send("Wrong password!");
+                } else {
+                    user.loginAttempts = 0;
+                    await user.save();
+                }
+            } else {
+                let suspendTime = new Date();
+                suspendTime.setTime(Date.now() + 1 * 2 * 60 * 1000);
+                user.suspended = suspendTime;
+                user.loginAttempts = 0;
+                await user.save();
+                return res.status(400).send(`Your user has been banned until ${user.suspended}`);
+            }
+        } else return res.status(400).send(`Your user has been banned until ${user.suspended}`);
 
         const token = jwt.sign({ _id: user._id, name: user.name, email: user.email, phone: user.phone, address: user.address, gender: user.gender, userType: user.userType, suspended: user.suspended }, process.env.jwtKey);
 
@@ -133,12 +153,15 @@ router.patch("/:id", auth, async (req, res) => {
         let user = await User.findOne({ _id: req.params.id });
         if (!user) return res.status(404).send("User does not exist!");
 
+        let suspendTime = new Date();
+
         const { error } = userTypeSchema.validate(req.body);
         if (!error) user.userType = req.body.userType;
         else {
-            let suspendTime = new Date();
-            suspendTime.setTime(Date.now() + 24 * 60 * 60 * 1000);
-            user.suspended = suspendTime;
+            if (req.body.suspendTime > 0) {
+                suspendTime.setTime(Date.now() + req.body.suspendTime * 60 * 60 * 1000);
+                user.suspended = suspendTime;
+            } else user.suspended = suspendTime;
         }
         await user.save();
 

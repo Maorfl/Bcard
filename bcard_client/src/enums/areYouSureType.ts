@@ -2,5 +2,7 @@ export enum Type {
     DeleteCard = "deleteCard",
     DeleteUser = "deleteUser",
     ChangeUserType = "userType",
-    ChangeToAdmin = "adminType"
+    ChangeToAdmin = "adminType",
+    SuspendUser = "suspendUser",
+    UnlockUser = "unlockUser"
 }
