@@ -29,11 +29,7 @@ const Login: FunctionComponent<LoginProps> = ({ setLoggedIn, loggedIn }) => {
                         setLoggedIn(!loggedIn);
                         navigate("/");
                     }
-                    else {
-                        console.log(Date.now());
-
-                        errorMsg(`Your user has been banned until ${(jwt_decode(res.data) as any).suspended}`);
-                    }
+                    else errorMsg(`Your user has been banned until ${(jwt_decode(res.data) as any).suspended}`);
                 })
                 .catch((error) => errorMsg(error.response.data))
         }
