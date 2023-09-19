@@ -30,5 +30,8 @@ app.use(cors());
 
 app.use("/api/users", users);
 app.use("/api/cards", cards);
+app.get("*", (req, res) => {
+    res.send("Page not found");
+});
 
 app.listen(port, () => console.log("Server started on port", port));
