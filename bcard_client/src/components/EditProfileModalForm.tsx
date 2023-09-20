@@ -2,7 +2,6 @@ import { FunctionComponent, useEffect, useRef } from "react";
 import User from "../interfaces/User";
 import { useFormik } from "formik";
 import * as yup from "yup";
-import { useNavigate } from "react-router-dom";
 import { updateUser } from "../services/usersService";
 import { successMsg } from "../services/feedbacksService";
 

@@ -101,6 +101,11 @@
         background-color: var(--color-button-danger) !important;
         border-color: var(--color-button-danger);
     }
+
+    &.btn-warning {
+        background-color: var(--color-button-warning) !important;
+        border-color: var(--color-button-warning);
+    }
 }
 
 form .form-floating input {
